@@ -12,5 +12,6 @@ app.get("/health", (req, res) => {
     const PORT = 4000; // Puerto asignado para el servidor
 
     app.listen(PORT, () => {
-        console.log("servidor corriendo en puerto ${PORT}");
-    }); // El servidor escucha el puerto y envia un mensaje a la consola indicando que el servidor está corriendo en el puerto que se le asignó
+        console.log(`servidor corriendo en puerto ${PORT}`);
+    }); // El servidor escucha el puerto y envia un mensaje a la consola indicando que el servidor está corriendo en el puerto que se le asignó    
+    
