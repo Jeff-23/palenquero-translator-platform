@@ -18,4 +18,3 @@ app.use("/api", translateRoutes); //conecta las rutas de traducción al servidor
     app.listen(PORT, () => {
         console.log(`servidor corriendo en puerto ${PORT}`);
     }); // El servidor escucha el puerto y envia un mensaje a la consola indicando que el servidor está corriendo en el puerto que se le asignó    
-    
