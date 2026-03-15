@@ -2,12 +2,16 @@ const express = require("express"); // Importamos el framework Express para crea
 const app = express(); // Creamos el servidor en express y lo asignamos a la variable app
 app.use(express.json());// Middleware para permitir texto en formato JSON   
 
+const translateRoutes = require("../backend/src/routes/translateRoutes");//importa las rutas de traducción
+
 app.get("/health", (req, res) => {
     res.json({ 
         status: "Corriendo", 
         message : "backend funcionando correctamente"
     });
     });// Creamos una ruta que muestre el estado del servidor y un mensaje indicando que el backend está funcionando correctamente
+
+app.use("/api", translateRoutes); //conecta las rutas de traducción al servidor
 
     const PORT = 4000; // Puerto asignado para el servidor
 
