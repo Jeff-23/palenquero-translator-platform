@@ -1,3 +1,5 @@
+console.log("translateController.js cargado");
+
 const { translate } = require("../services/translateService");
 
 const translateText = async (req, res) => {
