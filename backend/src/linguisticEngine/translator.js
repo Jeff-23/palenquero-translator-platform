@@ -32,10 +32,10 @@ const translateWord = (text) => {
     const words = text.split(" ");
 
     const translatedWords = words.map((word) => {
-        return dictionay[word] || word;
+        return dictionary[word] || word;
     });
     return translatedWords.join(" ");
+ };
 module.exports = {
     translateWord
 };
- };
