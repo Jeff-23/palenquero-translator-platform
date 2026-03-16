@@ -1,8 +1,9 @@
 const express = require("express"); // Importamos el framework Express para crear el servidor web
 const app = express(); // Creamos el servidor en express y lo asignamos a la variable app
+
 app.use(express.json());// Middleware para permitir texto en formato JSON   
 
-const translateRoutes = require("../backend/src/routes/translateRoutes");//importa las rutas de traducción
+const translateRoutes = require("./src/routes/translateRoutes");//importa las rutas de traducción
 
 app.get("/health", (req, res) => {
     res.json({ 
