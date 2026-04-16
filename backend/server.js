@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 
-console.log("=== SERVER PRUEBA DIRECTA ===");
+const translateRoutes = require("./src/routes/translateRoutes");
+
+console.log("=== SERVIDOR BACKEND TRADUCTOR ===");
 
 app.use(express.json());
 
@@ -17,25 +19,19 @@ app.get("/health", (req, res) => {
     });
 });
 
-app.post("/api/test", (req, res) => {
-    console.log("ENTRO A /api/test");
-    res.json({
-        ok: true,
-        body: req.body
-    });
-});
+// Rutas del traductor
+app.use("/api", translateRoutes);
 
-app.post("/api/translate", (req, res) => {
-    console.log("ENTRO A /api/translate");
-    res.json({
-        ok: true,
-        translation: "prueba directa",
-        recibido: req.body
+// Ruta no encontrada
+app.use((req, res) => {
+    res.status(404).json({
+        ok: false,
+        message: "Ruta no encontrada"
     });
 });
 
 const PORT = 4001;
 
 app.listen(PORT, () => {
-    console.log(`servidor corriendo en puerto ${PORT}`);
+    console.log(`Servidor corriendo en puerto ${PORT}`);
 });
