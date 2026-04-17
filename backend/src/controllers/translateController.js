@@ -2,18 +2,18 @@ console.log("translateController.js cargado");
 
 const { translate } = require("../services/translateService");
 
-const translateText = async (req, res) => {
+const translateText = (req, res) => {
     try {
         const { text } = req.body;
 
-        if (!text) {
+        if (!text || typeof text !== "string" || !text.trim()) {
             return res.status(400).json({
                 ok: false,
-                error: "Debes enviar un texto para traducir"
+                error: "Debes enviar un texto válido para traducir"
             });
         }
 
-        const result = await translate(text);
+        const result = translate(text);
 
         res.json({
             ok: true,

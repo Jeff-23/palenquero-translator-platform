@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 
 const translateRoutes = require("./src/routes/translateRoutes");
+const dictionaryRoutes = require("./src/routes/dictionaryRoutes");
 
 console.log("=== SERVIDOR BACKEND TRADUCTOR ===");
 
@@ -19,10 +20,9 @@ app.get("/health", (req, res) => {
     });
 });
 
-// Rutas del traductor
 app.use("/api", translateRoutes);
+app.use("/api", dictionaryRoutes);
 
-// Ruta no encontrada
 app.use((req, res) => {
     res.status(404).json({
         ok: false,
