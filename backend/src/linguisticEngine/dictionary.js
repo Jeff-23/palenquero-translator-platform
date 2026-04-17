@@ -1,3 +1,4 @@
+//Carpeta de Diego Casseres
 const dictionary = {
     desecho: "ansusú",
     raquítico: "aburao",
