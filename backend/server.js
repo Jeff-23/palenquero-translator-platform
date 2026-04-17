@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const translateRoutes = require("./src/routes/translateRoutes");
 const dictionaryRoutes = require("./src/routes/dictionaryRoutes");
+const statsRoutes = require("./src/routes/statsRoutes");
 const notFoundMiddleware = require("./src/middlewares/notFoundMiddleware");
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -26,8 +27,9 @@ app.get("/health", (req, res) => {
     });
 });
 
-app.use("/api", translateRoutes);
-app.use("/api", dictionaryRoutes);
+app.use("/api/v1", translateRoutes);
+app.use("/api/v1", dictionaryRoutes);
+app.use("/api/v1", statsRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
