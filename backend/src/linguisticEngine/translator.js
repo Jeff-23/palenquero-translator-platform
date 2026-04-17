@@ -1,8 +1,10 @@
 const dictionary = require("./dictionary");
-const { tokenize } = require("./tokenizer");
+const { tokenize, removeAccents } = require("./tokenizer");
 
 const cleanToken = (word) => {
-    return word.toLowerCase().replace(/[.,!?;:]/g, "");
+    return removeAccents(
+        word.toLowerCase().replace(/[.,!?;:]/g, "")
+    );
 };
 
 const getEndingPunctuation = (word) => {
@@ -11,7 +13,7 @@ const getEndingPunctuation = (word) => {
 
 const translateText = (text) => {
     const tokens = tokenize(text);
-    const unknownWords = [];
+    const unknownWordsSet = new Set();
     const translatedWords = [];
 
     let i = 0;
@@ -21,14 +23,13 @@ const translateText = (text) => {
         const next = i + 1 < tokens.length ? cleanToken(tokens[i + 1]) : null;
         const nextNext = i + 2 < tokens.length ? cleanToken(tokens[i + 2]) : null;
 
-        const punctuation = getEndingPunctuation(tokens[i + 2] || tokens[i + 1] || tokens[i]);
-
         // Intentar frase de 3 palabras
         if (current && next && nextNext) {
             const phrase3 = `${current}_${next}_${nextNext}`;
+            const punctuation3 = getEndingPunctuation(tokens[i + 2]);
 
             if (dictionary[phrase3]) {
-                translatedWords.push(dictionary[phrase3] + punctuation);
+                translatedWords.push(dictionary[phrase3] + punctuation3);
                 i += 3;
                 continue;
             }
@@ -51,7 +52,7 @@ const translateText = (text) => {
         const translated = dictionary[current] || current;
 
         if (!dictionary[current]) {
-            unknownWords.push(current);
+            unknownWordsSet.add(current);
         }
 
         translatedWords.push(translated + punctuation1);
@@ -61,7 +62,7 @@ const translateText = (text) => {
     return {
         translation: translatedWords.join(" "),
         tokens,
-        unknownWords
+        unknownWords: Array.from(unknownWordsSet)
     };
 };
 
