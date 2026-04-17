@@ -5,8 +5,8 @@ const cleanToken = (word) => {
     return removeAccents(
         word
             .toLowerCase()
-            .replace(/^[¿¡]+/, "")
-            .replace(/[.,!?;:¿¡]+$/g, "")
+            .replace(/^[¿¡"“"'([{]+/, "")
+            .replace(/[.,!?;:¿¡"”"'\])}]+$/g, "")
     );
 };
 
@@ -32,7 +32,6 @@ const translateText = (text) => {
         const next = i + 1 < tokens.length ? cleanToken(tokens[i + 1]) : null;
         const nextNext = i + 2 < tokens.length ? cleanToken(tokens[i + 2]) : null;
 
-        // Intentar frase de 3 palabras
         if (current && next && nextNext) {
             const phrase3 = `${current}_${next}_${nextNext}`;
             const startPunctuation3 = getStartingPunctuation(tokens[i]);
@@ -47,7 +46,6 @@ const translateText = (text) => {
             }
         }
 
-        // Intentar frase de 2 palabras
         if (current && next) {
             const phrase2 = `${current}_${next}`;
             const startPunctuation2 = getStartingPunctuation(tokens[i]);
@@ -62,7 +60,6 @@ const translateText = (text) => {
             }
         }
 
-        // Traducir palabra individual
         const startPunctuation1 = getStartingPunctuation(tokens[i]);
         const endPunctuation1 = getEndingPunctuation(tokens[i]);
         const translated = dictionary[current] || current;
