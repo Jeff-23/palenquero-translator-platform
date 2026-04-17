@@ -18,7 +18,9 @@ const translateText = (req, res) => {
         res.json({
             ok: true,
             original: text,
-            translation: result
+            translation: result.translation,
+            tokens: result.tokens,
+            unknownWords: result.unknownWords
         });
     } catch (error) {
         res.status(500).json({

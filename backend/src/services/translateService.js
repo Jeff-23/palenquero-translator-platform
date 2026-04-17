@@ -1,7 +1,7 @@
-const { translateWord } = require("../linguisticEngine/translator");
+const { translateText } = require("../linguisticEngine/translator");
 
 const translate = (text) => {
-    return translateWord(text);
+    return translateText(text);
 };
 
 module.exports = {

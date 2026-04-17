@@ -2,20 +2,29 @@
 const dictionary = require("./dictionary");
 const { tokenize } = require("./tokenizer");
 
-const translateWord = (text) => {
+const translateText = (text) => {
     const words = tokenize(text);
+    const unknownWords = [];
 
     const translatedWords = words.map((word) => {
         const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, "");
         const punctuation = word.match(/[.,!?;:]+$/)?.[0] || "";
-        const translated = dictionary[cleanWord] || cleanWord;
 
+        if (!dictionary[cleanWord]) {
+            unknownWords.push(cleanWord);
+        }
+
+        const translated = dictionary[cleanWord] || cleanWord;
         return translated + punctuation;
     });
 
-    return translatedWords.join(" ");
+    return {
+        translation: translatedWords.join(" "),
+        tokens: words,
+        unknownWords
+    };
 };
 
 module.exports = {
-    translateWord
+    translateText
 };
