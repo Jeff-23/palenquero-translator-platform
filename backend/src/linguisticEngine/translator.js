@@ -5,8 +5,8 @@ const cleanToken = (word) => {
     return removeAccents(
         word
             .toLowerCase()
-            .replace(/^[¿¡"“"'([{]+/, "")
-            .replace(/[.,!?;:¿¡"”"'\])}]+$/g, "")
+            .replace(/^[^a-z0-9]+/i, "")   // quita TODO lo que no sea letra al inicio
+            .replace(/[^a-z0-9]+$/i, "")   // quita TODO lo que no sea letra al final
     );
 };
 
