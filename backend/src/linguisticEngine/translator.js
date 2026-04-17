@@ -3,12 +3,21 @@ const { tokenize, removeAccents } = require("./tokenizer");
 
 const cleanToken = (word) => {
     return removeAccents(
-        word.toLowerCase().replace(/[.,!?;:]/g, "")
+        word
+            .toLowerCase()
+            .replace(/^[¿¡]+/, "")
+            .replace(/[.,!?;:¿¡]+$/g, "")
     );
 };
 
+const getStartingPunctuation = (word) => {
+    const match = word.match(/^[¿¡]+/);
+    return match ? match[0] : "";
+};
+
 const getEndingPunctuation = (word) => {
-    return word.match(/[.,!?;:]+$/)?.[0] || "";
+    const match = word.match(/[.,!?;:]+$/);
+    return match ? match[0] : "";
 };
 
 const translateText = (text) => {
@@ -23,16 +32,16 @@ const translateText = (text) => {
         const next = i + 1 < tokens.length ? cleanToken(tokens[i + 1]) : null;
         const nextNext = i + 2 < tokens.length ? cleanToken(tokens[i + 2]) : null;
 
-        console.log("TOKENS ORIGINALES:", tokens);
-        console.log("NORMALIZADOS:", { current, next, nextNext });
-
         // Intentar frase de 3 palabras
         if (current && next && nextNext) {
             const phrase3 = `${current}_${next}_${nextNext}`;
-            const punctuation3 = getEndingPunctuation(tokens[i + 2]);
+            const startPunctuation3 = getStartingPunctuation(tokens[i]);
+            const endPunctuation3 = getEndingPunctuation(tokens[i + 2]);
 
             if (dictionary[phrase3]) {
-                translatedWords.push(dictionary[phrase3] + punctuation3);
+                translatedWords.push(
+                    `${startPunctuation3}${dictionary[phrase3]}${endPunctuation3}`
+                );
                 i += 3;
                 continue;
             }
@@ -41,24 +50,31 @@ const translateText = (text) => {
         // Intentar frase de 2 palabras
         if (current && next) {
             const phrase2 = `${current}_${next}`;
-            const punctuation2 = getEndingPunctuation(tokens[i + 1]);
+            const startPunctuation2 = getStartingPunctuation(tokens[i]);
+            const endPunctuation2 = getEndingPunctuation(tokens[i + 1]);
 
             if (dictionary[phrase2]) {
-                translatedWords.push(dictionary[phrase2] + punctuation2);
+                translatedWords.push(
+                    `${startPunctuation2}${dictionary[phrase2]}${endPunctuation2}`
+                );
                 i += 2;
                 continue;
             }
         }
 
         // Traducir palabra individual
-        const punctuation1 = getEndingPunctuation(tokens[i]);
+        const startPunctuation1 = getStartingPunctuation(tokens[i]);
+        const endPunctuation1 = getEndingPunctuation(tokens[i]);
         const translated = dictionary[current] || current;
 
         if (!dictionary[current]) {
             unknownWordsSet.add(current);
         }
 
-        translatedWords.push(translated + punctuation1);
+        translatedWords.push(
+            `${startPunctuation1}${translated}${endPunctuation1}`
+        );
+
         i += 1;
     }
 
