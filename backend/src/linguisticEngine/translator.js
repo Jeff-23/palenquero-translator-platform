@@ -23,6 +23,9 @@ const translateText = (text) => {
         const next = i + 1 < tokens.length ? cleanToken(tokens[i + 1]) : null;
         const nextNext = i + 2 < tokens.length ? cleanToken(tokens[i + 2]) : null;
 
+        console.log("TOKENS ORIGINALES:", tokens);
+        console.log("NORMALIZADOS:", { current, next, nextNext });
+
         // Intentar frase de 3 palabras
         if (current && next && nextNext) {
             const phrase3 = `${current}_${next}_${nextNext}`;
