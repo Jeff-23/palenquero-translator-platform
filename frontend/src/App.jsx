@@ -206,7 +206,7 @@ export default function App() {
       <main className="app-container">
         <header className="hero">
           <span className="hero-badge">
-            UNIVERSIDAD DE CARTAGENA--CIPA TRES.
+            UNIVERSIDAD DE CARTAGENA--CIPA CINCO.
           </span>
 
           <h1>Traductor Español → Palenquero</h1>
