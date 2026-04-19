@@ -277,7 +277,7 @@ export default function App() {
 
           <section className="translator-card card">
             <div className="card-header">
-              <h2>Texto de entrada</h2>
+              <h2>Texto de entrada en español</h2>
               <span className="counter-text">{text.length}/2000</span>
             </div>
 
@@ -400,7 +400,7 @@ export default function App() {
             <div className="metrics-grid">
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">Tokens detectados</span>
+                  <span className="metric-label_1">Tokens detectados</span>
                   <span className="metric-icon blue">◫</span>
                 </div>
                 <strong className="metric-value">{tokens.length}</strong>
@@ -408,7 +408,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">No reconocidas</span>
+                  <span className="metric-label_2">No reconocidas</span>
                   <span className="metric-icon yellow">△</span>
                 </div>
                 <strong className="metric-value">{unknownWords.length}</strong>
@@ -416,7 +416,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">Traducidas</span>
+                  <span className="metric-label_3">Traducidas</span>
                   <span className="metric-icon green">✓</span>
                 </div>
                 <strong className="metric-value">{translatedWordsCount}</strong>
@@ -424,7 +424,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">Tiempo</span>
+                  <span className="metric-label_4">Tiempo</span>
                   <span className="metric-icon purple">◌</span>
                 </div>
                 <strong className="metric-value">
