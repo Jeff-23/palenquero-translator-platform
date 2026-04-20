@@ -516,7 +516,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">No reconocidas</span>
+                  <span className="metric-label_2">No reconocidas</span>
                   <span className="metric-icon yellow">△</span>
                 </div>
                 <strong className="metric-value">{unknownWords.length}</strong>
@@ -524,7 +524,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">Traducidas</span>
+                  <span className="metric-label_3">Traducidas</span>
                   <span className="metric-icon green">✓</span>
                 </div>
                 <strong className="metric-value">{translatedWordsCount}</strong>
@@ -532,7 +532,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label">Tiempo</span>
+                  <span className="metric-label_4">Tiempo</span>
                   <span className="metric-icon purple">◌</span>
                 </div>
                 <strong className="metric-value">
