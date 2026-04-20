@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { translateText } from "./services/translatorApi";
 import Mascot from "./components/Mascot";
+
+const HISTORY_STORAGE_KEY = "palenquero_translation_history";
 
 export default function App() {
   const [text, setText] = useState("");
@@ -15,18 +17,61 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    try {
+      const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+      if (savedHistory) {
+        const parsedHistory = JSON.parse(savedHistory);
+        if (Array.isArray(parsedHistory)) {
+          setHistory(parsedHistory);
+        }
+      }
+    } catch (err) {
+      console.error("No se pudo cargar el historial:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    } catch (err) {
+      console.error("No se pudo guardar el historial:", err);
+    }
+  }, [history]);
+
   const normalizeTokens = (value) => {
     if (Array.isArray(value)) return value;
 
     if (typeof value === "string") {
       return value
-        .split(/[\s,]+/)
+        .split(/[\s,.;:¡!¿?()[\]{}"'-]+/)
         .map((item) => item.trim())
         .filter(Boolean);
     }
 
     return [];
   };
+
+  const normalizeWord = (str = "") =>
+    str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[.,!?;:¡!¿?()[\]{}"'-]/g, "")
+      .trim();
+
+  const normalizedUnknownWords = useMemo(() => {
+    return unknownWords.map((word) => normalizeWord(word));
+  }, [unknownWords]);
+
+  const inputWordsCount = useMemo(() => {
+    if (!text.trim()) return 0;
+
+    return text
+      .split(/\s+/)
+      .map((item) => item.trim())
+      .filter(Boolean).length;
+  }, [text]);
 
   const translatedWordsCount = useMemo(() => {
     if (!translation) return 0;
@@ -43,13 +88,6 @@ export default function App() {
     return "Requiere revisión parcial";
   }, [translation, unknownWords]);
 
-  const confidence = useMemo(() => {
-    if (!translation) return 0;
-    const base = 100;
-    const penalty = unknownWords.length * 18;
-    return Math.max(60, base - penalty);
-  }, [translation, unknownWords]);
-
   const recognizedWords = useMemo(() => {
     return Math.max(tokens.length - unknownWords.length, 0);
   }, [tokens, unknownWords]);
@@ -59,24 +97,48 @@ export default function App() {
     return Math.round((recognizedWords / tokens.length) * 100);
   }, [recognizedWords, tokens]);
 
+  const confidence = useMemo(() => {
+    if (!translation || !tokens.length) return 0;
+
+    const baseCoverage = lexicalCoverage;
+    const unknownPenalty = unknownWords.length * 6;
+    const lengthBonus = tokens.length >= 3 ? 4 : 0;
+
+    return Math.max(
+      0,
+      Math.min(100, baseCoverage - unknownPenalty + lengthBonus)
+    );
+  }, [translation, tokens, lexicalCoverage, unknownWords]);
+
+  const coverageToneClass = useMemo(() => {
+    if (!translation) return "";
+    if (lexicalCoverage >= 80) return "is-high";
+    if (lexicalCoverage >= 50) return "is-medium";
+    return "is-low";
+  }, [translation, lexicalCoverage]);
+
   const saveToHistory = ({
     input,
     output,
-    tokensCount,
-    unknownCount,
+    tokensList,
+    unknownList,
     confidenceValue,
+    elapsedValue,
   }) => {
     const newItem = {
       id: crypto.randomUUID(),
       input,
       output,
-      tokensCount,
-      unknownCount,
+      tokensList,
+      unknownList,
+      tokensCount: tokensList.length,
+      unknownCount: unknownList.length,
       confidenceValue,
+      elapsedValue,
       time: new Date().toLocaleTimeString(),
     };
 
-    setHistory((prev) => [newItem, ...prev].slice(0, 6));
+    setHistory((prev) => [newItem, ...prev].slice(0, 8));
   };
 
   const handleTranslate = async () => {
@@ -86,6 +148,7 @@ export default function App() {
       setTokens([]);
       setUnknownWords([]);
       setElapsedMs(0);
+      setCopied(false);
       setMascotState("error");
 
       setTimeout(() => {
@@ -116,7 +179,23 @@ export default function App() {
       const normalizedUnknown = normalizeTokens(result.unknownWords);
       const translatedText = result.translation || "";
       const finalElapsed = Math.max(rawElapsed, minimumDuration);
-      const finalConfidence = Math.max(60, 100 - normalizedUnknown.length * 18);
+
+      const recognizedCount = Math.max(
+        normalizedTokens.length - normalizedUnknown.length,
+        0
+      );
+      const finalCoverage = normalizedTokens.length
+        ? Math.round((recognizedCount / normalizedTokens.length) * 100)
+        : 0;
+      const finalConfidence = Math.max(
+        0,
+        Math.min(
+          100,
+          finalCoverage -
+            normalizedUnknown.length * 6 +
+            (normalizedTokens.length >= 3 ? 4 : 0)
+        )
+      );
 
       setTranslation(translatedText);
       setTokens(normalizedTokens);
@@ -127,9 +206,10 @@ export default function App() {
       saveToHistory({
         input: text,
         output: translatedText,
-        tokensCount: normalizedTokens.length,
-        unknownCount: normalizedUnknown.length,
+        tokensList: normalizedTokens,
+        unknownList: normalizedUnknown,
         confidenceValue: finalConfidence,
+        elapsedValue: finalElapsed,
       });
 
       setTimeout(() => {
@@ -141,6 +221,7 @@ export default function App() {
       setTokens([]);
       setUnknownWords([]);
       setElapsedMs(0);
+      setCopied(false);
       setMascotState("error");
 
       setTimeout(() => {
@@ -168,10 +249,11 @@ export default function App() {
     try {
       await navigator.clipboard.writeText(translation);
       setCopied(true);
+      setError("");
 
       setTimeout(() => {
         setCopied(false);
-      }, 1400);
+      }, 1600);
     } catch {
       setError("No se pudo copiar la traducción.");
     }
@@ -180,8 +262,12 @@ export default function App() {
   const handleUseHistoryItem = (item) => {
     setText(item.input);
     setTranslation(item.output);
+    setTokens(item.tokensList || []);
+    setUnknownWords(item.unknownList || []);
+    setElapsedMs(item.elapsedValue || 0);
     setCopied(false);
     setError("");
+    setMascotState("idle");
   };
 
   const handleDeleteHistoryItem = (id) => {
@@ -240,12 +326,12 @@ export default function App() {
               <div className="mascot-bubble">
                 <h3>Asistente lingüístico</h3>
                 <p>
-                  Te ayudo a traducir texto del español al palenquero y a
-                  revisar cómo se procesa cada entrada.
+                  Te ayudo a traducir texto del español al palenquero y a revisar
+                  cómo se procesa cada entrada.
                 </p>
                 <p>
-                  Escribe una frase, presiona <strong>Traducir</strong> y
-                  analiza tokens, palabras reconocidas y cobertura léxica.
+                  Escribe una frase, presiona <strong>Traducir</strong> y analiza
+                  tokens, palabras reconocidas y cobertura léxica.
                 </p>
               </div>
             </div>
@@ -299,21 +385,21 @@ export default function App() {
                 className="example-chip"
                 onClick={() => fillExample("Hola, ¿cómo estás?")}
               >
-                Hola, ¿cómo estás?
+                ✨ Hola, ¿cómo estás?
               </button>
               <button
                 type="button"
                 className="example-chip"
                 onClick={() => fillExample("El agua es vida")}
               >
-                El agua es vida
+                💧 El agua es vida
               </button>
               <button
                 type="button"
                 className="example-chip"
                 onClick={() => fillExample("Quiero aprender palenquero")}
               >
-                Quiero aprender palenquero
+                📘 Quiero aprender palenquero
               </button>
             </div>
 
@@ -342,8 +428,12 @@ export default function App() {
               </div>
 
               <p className="input-helper">
-                💡 Ingresa una frase o párrafo corto para obtener la traducción
-                y el análisis.
+                💡 Ingresa una frase o párrafo corto para obtener la traducción y
+                el análisis.
+              </p>
+
+              <p className="input-helper">
+                Palabras: <strong>{inputWordsCount}</strong>
               </p>
 
               {error && <p className="error-text">{error}</p>}
@@ -358,11 +448,11 @@ export default function App() {
               <div className="result-header-right">
                 <span className="result-tag">Lengua Palenquera</span>
                 <button
-                  className="copy-btn"
+                  className={`copy-btn ${copied ? "copied" : ""}`}
                   onClick={handleCopy}
                   disabled={!translation}
                 >
-                  {copied ? "Copiado" : "Copiar"}
+                  {copied ? "✅ Copiado" : "Copiar resultado"}
                 </button>
               </div>
             </div>
@@ -377,30 +467,48 @@ export default function App() {
               {translation ? (
                 <div className="translation-wrapper">
                   <p className="translation-text">
-                    {translation}
+                    {translation.split(/\s+/).map((word, index) => {
+                      const cleanWord = normalizeWord(word);
+                      const isUnknown = normalizedUnknownWords.includes(cleanWord);
+
+                      return (
+                        <span
+                          key={`${word}-${index}`}
+                          className={isUnknown ? "word-unknown" : ""}
+                        >
+                          {word}
+                          {index < translation.split(/\s+/).length - 1 ? " " : ""}
+                        </span>
+                      );
+                    })}
                     {loading && <span className="cursor">|</span>}
                   </p>
 
                   <div className="loading-row">
-                    <span
-                      className={`live-dot ${loading ? "active" : ""}`}
-                    ></span>
-                    <span>
-                      {loading ? "Traduciendo..." : "Traducción lista"}
-                    </span>
+                    <span className={`live-dot ${loading ? "active" : ""}`}></span>
+                    <span>{loading ? "Traduciendo..." : "Traducción lista"}</span>
                   </div>
                 </div>
               ) : (
-                <p className="placeholder-text">
-                  Aquí aparecerá la traducción generada por el sistema.
-                </p>
+                <div className="placeholder-wrap">
+                  <p className="placeholder-title">Sin traducción todavía</p>
+                  <p className="placeholder-text">
+                    Aquí aparecerá la traducción generada por el sistema.
+                  </p>
+
+                  <div className="empty-suggestions">
+                    <span className="empty-chip">hola</span>
+                    <span className="empty-chip">agua</span>
+                    <span className="empty-chip">quiero aprender</span>
+                  </div>
+                </div>
               )}
             </motion.div>
 
             <div className="metrics-grid">
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label_1">Tokens detectados</span>
+                  <span className="metric-label">Tokens detectados</span>
                   <span className="metric-icon blue">◫</span>
                 </div>
                 <strong className="metric-value">{tokens.length}</strong>
@@ -408,7 +516,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label_2">No reconocidas</span>
+                  <span className="metric-label">No reconocidas</span>
                   <span className="metric-icon yellow">△</span>
                 </div>
                 <strong className="metric-value">{unknownWords.length}</strong>
@@ -416,7 +524,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label_3">Traducidas</span>
+                  <span className="metric-label">Traducidas</span>
                   <span className="metric-icon green">✓</span>
                 </div>
                 <strong className="metric-value">{translatedWordsCount}</strong>
@@ -424,7 +532,7 @@ export default function App() {
 
               <div className="metric-card">
                 <div className="metric-top">
-                  <span className="metric-label_4">Tiempo</span>
+                  <span className="metric-label">Tiempo</span>
                   <span className="metric-icon purple">◌</span>
                 </div>
                 <strong className="metric-value">
@@ -467,18 +575,38 @@ export default function App() {
             <div className="analysis-kpis">
               <div className="analysis-kpi">
                 <span className="analysis-kpi-label">Reconocidas</span>
-                <strong className="analysis-kpi-value">
-                  {recognizedWords}
-                </strong>
+                <strong className="analysis-kpi-value">{recognizedWords}</strong>
               </div>
 
               <div className="analysis-kpi">
                 <span className="analysis-kpi-label">Cobertura léxica</span>
-                <strong className="analysis-kpi-value">
+                <strong className={`analysis-kpi-value ${coverageToneClass}`}>
                   {tokens.length ? `${lexicalCoverage}%` : "--"}
                 </strong>
               </div>
             </div>
+
+            {tokens.length > 0 && (
+              <div className="confidence-card">
+                <div className="confidence-header">
+                  <span>Cobertura del diccionario</span>
+                  <span className="confidence-percent">{lexicalCoverage}%</span>
+                </div>
+
+                <div className="confidence-bar">
+                  <div
+                    className="confidence-fill"
+                    style={{ width: `${lexicalCoverage}%` }}
+                  ></div>
+                </div>
+
+                <div className="confidence-scale">
+                  <span>Baja</span>
+                  <span>Cobertura media</span>
+                  <span>Alta</span>
+                </div>
+              </div>
+            )}
 
             <div className="analysis-section">
               <h3>Tokens ({tokens.length})</h3>
@@ -506,8 +634,11 @@ export default function App() {
               <h3>Palabras no reconocidas ({unknownWords.length})</h3>
 
               <p className="analysis-helper-text">
-                Términos que no fueron encontrados directamente en el
-                diccionario base.
+                Estas palabras requieren revisión manual.
+              </p>
+
+              <p className="analysis-helper-text">
+                <strong>Rojo:</strong> palabra no encontrada en el diccionario base.
               </p>
 
               <div className="tokens-container">
@@ -531,8 +662,14 @@ export default function App() {
               </div>
             </div>
 
-            <div className="analysis-summary-box">
-              <div className="summary-icon">✓</div>
+            <div
+              className={`analysis-summary-box ${
+                unknownWords.length > 0 ? "warning" : ""
+              }`}
+            >
+              <div className="summary-icon">
+                {unknownWords.length > 0 ? "!" : "✓"}
+              </div>
               <div>
                 <strong>
                   {unknownWords.length === 0
@@ -567,7 +704,16 @@ export default function App() {
               history.map((item) => (
                 <div key={item.id} className="history-item">
                   <div className="history-item-main">
-                    <strong className="history-input">{item.input}</strong>
+                    <div className="history-input-group">
+                      <span className="history-label">Texto original</span>
+                      <strong className="history-input">{item.input}</strong>
+
+                      <span className="history-label">Traducción</span>
+                      <span className="history-output">
+                        {item.output || "Sin resultado"}
+                      </span>
+                    </div>
+
                     <span className="history-time">{item.time}</span>
                   </div>
 
@@ -575,11 +721,14 @@ export default function App() {
                     <span>Tokens: {item.tokensCount}</span>
                     <span>Desconocidas: {item.unknownCount}</span>
                     <span>Confianza: {item.confidenceValue}%</span>
+                    <span>
+                      Tiempo: {item.elapsedValue ? `${item.elapsedValue} ms` : "--"}
+                    </span>
                   </div>
 
                   <div className="history-actions">
                     <button
-                      className="history-action-btn"
+                      className="history-action-btn history-action-btn-primary"
                       onClick={() => handleUseHistoryItem(item)}
                     >
                       Usar
