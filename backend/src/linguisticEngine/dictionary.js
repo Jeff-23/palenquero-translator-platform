@@ -392,7 +392,7 @@ const dictionary = {
     carne: "kane",
     casi: "kapurí",
     camino: "kaddume",
-    grupo_de_persona: "kankamaná",
+    grupo_de_personas: "kankamaná",
     travieso: "katambuko",
     cancer: "kankano",
     tinaja: "kasuela",
