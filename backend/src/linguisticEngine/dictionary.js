@@ -753,7 +753,10 @@ const dictionary = {
     bastimento_o_yuca: "yuka",
     ayudar: "yulá",
     palta_medicinal: "yuya",
-    baile_de_muerto: "yantolé"
+    baile_de_muerto: "yantolé",
+    nombre: "i_se_ñama",
+    años: "año",
+    hola: "asina",
 
 };
 
