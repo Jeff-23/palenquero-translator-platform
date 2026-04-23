@@ -6,14 +6,8 @@
   font-weight: 400;
 
   --bg-main: #081120;
-<<<<<<< HEAD
   --bg-card: rgba(15, 23, 42, 0.72);
   --bg-soft: rgba(24, 9, 9, 0.38);
-=======
-  --bg-card: rgba(11, 19, 36, 0.78);
-  --bg-card-strong: rgba(8, 15, 30, 0.9);
-  --bg-soft: rgba(9, 14, 24, 0.42);
->>>>>>> f44169018db66ff3233a0cb7cde04b06a01f5217
   --bg-soft-2: rgba(255, 255, 255, 0.04);
   --bg-soft-3: rgba(19, 29, 52, 0.62);
 
