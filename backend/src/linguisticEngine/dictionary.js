@@ -338,7 +338,7 @@ const dictionary = {
     ganado: "ngombe",
     gastar: "ngatá",
     engañar: "gañá",
-    caracol_terrestre: "ngombe_chá_monika",
+    caracol_terrestre: "ngombe chá monika",
     granizo: "ngranio",
     guisado: "n_guisao",
     ganar: "nganá",
@@ -634,8 +634,8 @@ const dictionary = {
     brujo: "ombriao",
     fiesta: "oriki",
     olor: "oló",
-    manantial: "ojo_rí_apu",
-    tobillo: "ojo_rí_pie",
+    manantial: "ojo rí apu",
+    tobillo: "ojo rí pie",
     orar: "orá",
     hora: "ora",
     para: "pa",
@@ -705,7 +705,7 @@ const dictionary = {
     bailar: "sarangiá",
     reclamar_lo_dado: "sakariñá",
     julio: "santana",
-    junio: "san_juan",
+    junio: "san juan",
     brujo: "sangano",
     hundirse: "sabuyí",
     meter_el_pies: "sangariamusá",
@@ -793,13 +793,11 @@ const dictionary = {
     baile_de_muerto: "yantolé",
     rito_funebre: "lumbalú",
     lumbalú: "lumbalú",
-    nombre: "se_ñama",
+    nombre: "se ñama",
     años: "año",
     hola: "asina",
-    como_estas: "¿kumo kusa ta?",
-    que_haces: "¿ke_bo_ta_ase?",
-    
-
+    como_estas: "kumo kusa ta",
+    que_haces: "ke bo ta ase",
 };
 
 module.exports = dictionary;
