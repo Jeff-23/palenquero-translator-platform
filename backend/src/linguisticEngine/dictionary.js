@@ -42,6 +42,7 @@
 //: "embelekeria"--sin significado 
 ///
 const dictionary = {
+    aseguranza: "arrelike",
     desecho: "ansusú",
     raquítico: "aburao",
     anillo: "anío",
@@ -516,8 +517,11 @@ const dictionary = {
     ombligo: "lombligo",
     luz: "lu",
     morir: "lungá",
+    muerto: "lungao",
     mas: "ma",
+    más: "ma",
     madre: "mae",
+    mamá: "mae",
     primero: "mano",
     enfermo: "mako",
     amarrar: "malá",
@@ -771,7 +775,9 @@ const dictionary = {
     hombre: "umbriao",
     justo: "urio",
     indispuesta: "utautá",
-    ayudar: "uyulá",
+    ayudar: "nyulá",
+    ayuda: "nyula",
+    ayudo: "",
     utilizar: "utiliza",
     tierra_de_piedra: "unguelá",
     tambor: "yamaro",
@@ -785,9 +791,14 @@ const dictionary = {
     ayudar: "yulá",
     palta_medicinal: "yuya",
     baile_de_muerto: "yantolé",
+    rito_funebre: "lumbalú",
+    lumbalú: "lumbalú",
     nombre: "se_ñama",
     años: "año",
     hola: "asina",
+    como_estas: "¿kumo kusa ta?",
+    que_haces: "¿ke_bo_ta_ase?",
+    
 
 };
 
