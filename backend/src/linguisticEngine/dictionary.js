@@ -798,6 +798,10 @@ const dictionary = {
     hola: "asina",
     como_estas: "kumo kusa ta",
     que_haces: "ke bo ta ase",
+    que_tal: "kumo kusa ta",
+    mi: "i",
+    nombre_es: "se ñama",
+    
 };
 
 module.exports = dictionary;
